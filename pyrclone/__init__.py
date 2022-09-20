@@ -1,4 +1,4 @@
-from keyup._version import __version__ as version
+from pyrclone._version import __version__ as version
 
 
 __author__ = 'Blake Huber'
@@ -11,12 +11,10 @@ __email__ = "blakeca00@gmail.com"
 
 try:
 
-    from keyup import logd
-    logger = logd.getLogger(__version__)
+    from pyrclone import logd
 
-    # set pyaws log function to keyup global logger
-    import pyaws
-    pyaws.logger = logger
+    # init logger object
+    logger = logd.getLogger(__version__)
 
 except Exception:
     pass
