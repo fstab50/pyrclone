@@ -33,7 +33,7 @@ ${bodytext}
 
   ${title}SYNOPSIS${bodytext}
 
-            $  sh ${title}lambda-audit.sh${bodytext}   --profile | --accounts
+            $  sh ${title}rclone_bash.sh${bodytext}   --profile | --accounts
                     -p | --profile   ${yellow}PROFILE${bodytext}
                     -a | --accounts  ${yellow}ACCTFILE${bodytext}
                    [-n | --name      ${yellow}FUNCTION_NAME${bodytext} ]
@@ -68,16 +68,16 @@ function parse_parameters(){
     else
         while [ $# -gt 0 ]; do
             case $1 in
-                -a | --accounts)
-                    ACCTFILE="$2"
+                -r | --remote)
+                    REMOTE="$2"
                     if [ -f $ACCTFILE ]; then ACCOUNTS=$(cat $ACCTFILE); fi
                     shift 2
                     ;;
-                -c | --code)
-                    MFACODE=$2
+                -c | --copy)
+                    REMOTE=$2
                     shift 2
                     ;;
-                -n | --name)
+                -l | --list)
                     SINGLE_FUNCTION="true"
                     if [ "$2" ]; then
                        FUNCTION_NAME=$2
@@ -92,13 +92,9 @@ function parse_parameters(){
                     shift 1
                     exit 0
                     ;;
-                -r | --region)
-                    REGION=$2
-                    shift 2
-                    ;;
-                -p | --profile)
+                -v | --verify-installation)
                     PROFILE="$2"
-                    shift 2
+                    shift 1
                     ;;
                 *)
                     echo "Unknown parameter ($1). Exiting"
@@ -137,21 +133,8 @@ function calculate_unique_locations(){
 }
 
 
-function float2int() {
-  awk 'BEGIN{for (i=1; i<ARGC;i++) printf "%.0f\n", ARGV[i]}' "$@"
-}
-
-
-function get_regions(){
-    local profilename="$1"
-    declare -a regions
-    if [ $REGION_FLAG ]; then
-        return 0
-    else
-        regions="$(aws --profile $profilename ec2 describe-regions | jq -r .Regions[].RegionName)"
-        REGION_FLAG='true'
-        echo "${regions[@]}"
-    fi
+function rsync_2local_target() {
+    rsync -arv /home/blake/Downloads/gdrive/* /home/blake/Documents/Trading/STATIC\ PORTFOLIO\ DOCUMENTATION/ --delete
 }
 
 
