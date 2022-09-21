@@ -4,10 +4,10 @@
 pkg=$(basename $0)
 pkg_path=$(cd $(dirname $0); pwd -P)
 clear=$(which clear)
-twidth=$(( $(tput cols) - 6 ))
-declare -a REGIONS
-num_locations=0
-declare -a ACCOUNTS
+
+SOURCE_DIR="/home/blake/Downloads/gdrive"
+DESTINATION_DIR="/home/blake/Documents/Trading/STATIC PORTFOLIO DOCUMENTATION"
+
 
 # formatting
 source $pkg_path/core/std_functions.sh
@@ -33,11 +33,12 @@ ${bodytext}
 
   ${title}SYNOPSIS${bodytext}
 
-            $  sh ${title}rclone_bash.sh${bodytext}   --profile | --accounts
-                    -p | --profile   ${yellow}PROFILE${bodytext}
-                    -a | --accounts  ${yellow}ACCTFILE${bodytext}
-                   [-n | --name      ${yellow}FUNCTION_NAME${bodytext} ]
-                   [-r | --region    ${yellow}REGION${bodytext}   ]
+            $  sh ${title}rclone_bash.sh${bodytext}   --download | --accounts
+                    -r | --remote   ${yellow}REMOTE${bodytext}
+                   [-d | --download ]
+                   [-h | --help     ]
+                   [-l | --list     ]
+                   [-v | --verify   ]
 
   ${title}OPTIONS${bodytext}
 
@@ -116,7 +117,7 @@ function parse_parameters(){
 }
 
 
-function calculate_unique_locations(){
+function download_from_remote(){
     ## calculates number of unique regions lambda functions found ##
     declare -a locations=("${!1}")
     declare -a uniques=( )
@@ -134,27 +135,11 @@ function calculate_unique_locations(){
 
 
 function rsync_2local_target() {
-    rsync -arv /home/blake/Downloads/gdrive/* /home/blake/Documents/Trading/STATIC\ PORTFOLIO\ DOCUMENTATION/ --delete
-}
-
-
-function profilename_prefix(){
-    ##
-    ##  Returns temporary credentials found for a role
-    ##
-    ##  Note:  temp credentials must be generated
-    ##         prior to use; otherwise, this function
-    ##         will return the profilename "as is"
-    ##
-    local profilename="$1"
-    if [ "$(grep "gcreds-$profilename" ~/.aws/credentials)" ]; then
-        PROFILE="gcreds-$profilename"
-        echo "gcreds-$profilename"
-    else
-        PROFILE="$profilename"
-        echo "$profilename"
-    fi
-    return 0
+    ## rsync fs from source dir to destination dir on local machine ##
+    local source="$1"
+    local destination="$2"
+    #
+    rsync -arv $source/* $destination/ --delete
 }
 
 
