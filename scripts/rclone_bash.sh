@@ -5,16 +5,17 @@ pkg=$(basename $0)
 pkg_path=$(cd $(dirname $0); pwd -P)
 clear=$(which clear)
 
-SOURCE_DIR="/home/blake/Downloads/gdrive"
-DESTINATION_DIR="/home/blake/Documents/Trading/STATIC PORTFOLIO DOCUMENTATION"
-
-
 # formatting
-source $pkg_path/core/std_functions.sh
-source $pkg_path/core/colors.sh
+source $pkg_path/std_functions.sh
+source $pkg_path/colors.sh
 frame=$(echo -e ${brightblue})
+reset=$(tput sgr0)
+bodytext=$(echo -e ${reset}${a_wgray})
 sp="${frame}|${bodytext}"
-total_width="146"
+
+#
+SOURCE_DEFAULT="/home/blake/Downloads/gdrive"
+DESTINATION_DEFAULT="/home/blake/Documents/Trading/STATIC PORTFOLIO DOCUMENTATION"
 
 # error codes
 E_BADARG=8                  # exit code if bad input parameter
@@ -34,7 +35,8 @@ ${bodytext}
   ${title}SYNOPSIS${bodytext}
 
             $  sh ${title}rclone_bash.sh${bodytext}   --download | --accounts
-                    -r | --remote   ${yellow}REMOTE${bodytext}
+
+                    -r | --remote   <${yellow}REMOTE${bodytext}>
                    [-d | --download ]
                    [-h | --help     ]
                    [-l | --list     ]
@@ -42,20 +44,17 @@ ${bodytext}
 
   ${title}OPTIONS${bodytext}
 
-      ${title}-p | --profile${bodytext}:  Either ${yellow}PROFILE${bodytext} or ${yellow}ACCTFILE${bodytext} parameter
-          can be submitted; ie, they are mutually exclusive option
-          parameters.
+      ${title}-r | --remote${bodytext}:  Remote file share (local or network location).
 
-      ${title}-a | --accounts${bodytext}: File containing 1 or more IAM user or roles
-          present in the local awscli configuration. Lambda-audit
-          will iterate through this list of users producing a report
-          on all lambda functions found within the enclosing AWS Ac-
-          count of which the user or role is a member.
+      ${title}-d | --download${bodytext}: Download complete file set from <${yellow}REMOTE${bodytext}>.
+                  must be used in conjunction with --remote parameter.
 
-      ${title}-r | --region${bodytext}:  if ${yellow}REGION${bodytext} omitted, All AWS regions are audited.
+      ${title}-h | --help${bodytext}:  Print this help menu
 
-      ${title}-n | --name${bodytext}:  Named Function. Used to return only results for
-          a single, named function if it exists in the AWS Account.
+      ${title}-l | --list${bodytext}:  List remotes available on this local machine.
+
+      ${title}-v | --verify${bodytext}:  Verify installation of the rclone application
+                  on local machine.
 
 EOM
     #
@@ -71,32 +70,30 @@ function parse_parameters(){
             case $1 in
                 -r | --remote)
                     REMOTE="$2"
-                    if [ -f $ACCTFILE ]; then ACCOUNTS=$(cat $ACCTFILE); fi
                     shift 2
                     ;;
+
                 -c | --copy)
-                    REMOTE=$2
-                    shift 2
+                    OPERATION="COPY"
+                    shift 1
                     ;;
+
                 -l | --list)
-                    SINGLE_FUNCTION="true"
-                    if [ "$2" ]; then
-                       FUNCTION_NAME=$2
-                       shift 2
-                    else
-                        std_warn "You must provide the case-sensitive Name of a Function with the ${bold}--name${reset} parameter" "WARN"
-                        exit 1
-                    fi
+                    OPERATION="LIST"
+                    shift 1
                     ;;
+
                 -h | --help)
                     help_menu
                     shift 1
                     exit 0
                     ;;
+
                 -v | --verify-installation)
                     PROFILE="$2"
                     shift 1
                     ;;
+
                 *)
                     echo "Unknown parameter ($1). Exiting"
                     exit $E_BADARG
@@ -119,18 +116,13 @@ function parse_parameters(){
 
 function download_from_remote(){
     ## calculates number of unique regions lambda functions found ##
-    declare -a locations=("${!1}")
-    declare -a uniques=( )
-    local count
+    local remote_fs="$1"
+    local write_dir=$(pwd)
+    local rclone=$(which rclone)
     #
-    count=0
-    for region in ${locations[@]}; do
-        if [ ! "$(echo ${uniques[@]} | grep $region)" ]; then
-            count=$(( $count + 1 ))
-            uniques=( ${uniques[@]} $region )
-        fi
-    done
-    echo $count
+    $rclone copy $remote_fs $write_dir
+    #
+    # <-- end function download_from_remote -->
 }
 
 
@@ -142,19 +134,6 @@ function rsync_2local_target() {
     rsync -arv $source/* $destination/ --delete
 }
 
-
-function set_tempdir(){
-    ## sets working dir in ram ##
-    if [ "$(df /run | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
-            # in-memory
-            TMPDIR="/dev/shm"
-            cd $TMPDIR
-    else
-        std_message "Failed to find tempfs ram disk.  Using /tmp as alternate" "INFO"
-        TMPDIR="/tmp"
-        cd $TMPDIR
-    fi
-}
 
 function print_table(){
     ## output table of results ##
