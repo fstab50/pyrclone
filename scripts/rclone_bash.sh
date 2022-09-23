@@ -32,7 +32,7 @@ ${bodytext}
 
   ${title}SYNOPSIS${bodytext}
 
-            $  sh ${title}rclone_bash.sh${bodytext}   --download | --accounts
+            $  sh ${title}$pkg${bodytext}   --download || --copy --remote
 
                     -r | --remote   <${yellow}REMOTE${bodytext}>
                    [-d | --download ]
