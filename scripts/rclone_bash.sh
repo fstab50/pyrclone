@@ -35,6 +35,7 @@ ${bodytext}
             $  sh ${title}$pkg${bodytext}   --download || --copy --remote
 
                     -r | --remote   <${yellow}REMOTE${bodytext}>
+                   [-c | --copy ]
                    [-d | --download ]
                    [-h | --help     ]
                    [-l | --list     ]
@@ -89,7 +90,7 @@ function parse_parameters(){
 
                 -v | --verify)
                     verify_installation
-                    shift 1
+                    exit 0
                     ;;
 
                 *)
@@ -150,8 +151,10 @@ function verify_installation(){
     program="rclone"
     if [[ $(command -v $program) ]]; then
         std_message "$program installed" "INFO"
+        return 0
     else
-        std_message "$program not installed or not in your PATH" "WARN"
+        std_message "$program not installed or not in your PATH. Exit" "WARN"
+        return 1
     fi
 }
 
@@ -160,6 +163,12 @@ function verify_installation(){
 #
 
 parse_parameters $@
+
+if verify_installation; then
+    continue
+else
+    exit 1
+fi
 
 
 exit 0
