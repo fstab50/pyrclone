@@ -57,7 +57,7 @@ def is_installed(program):
     """
     cmd = 'which rclone 2>/dev/null | grep rclone'
     if which(program):
-        logger.info(f'Program {program} is installed')
+        stdout_message(f'Program {program} is installed')
         return True
     stdout_message(f'Program {program} is not installed or is not in PATH. Quitting.', prefix='warn')
     return False
