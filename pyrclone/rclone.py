@@ -48,7 +48,7 @@ def clear_tempspace(directory):
     return True
 
 
-def is_installed(program):
+def is_installed(program, silent=True):
     """
         Check to see if rclone is installed and executable
 
@@ -57,9 +57,11 @@ def is_installed(program):
     """
     cmd = 'which rclone 2>/dev/null | grep rclone'
     if which(program):
-        stdout_message(f'Program {program} is installed')
+        if silent is False:
+            stdout_message(f'Program {program} is installed')
         return True
-    stdout_message(f'Program {program} is not installed or is not in PATH. Quitting.', prefix='warn')
+    if silent is False:
+        stdout_message(f'Program {program} is not installed or is not in PATH. Quitting.', prefix='warn')
     return False
 
 
@@ -150,7 +152,7 @@ def init():
         sys.exit(1)
 
     elif args.version:
-        print(f'rclone version {__version__} \n')
+        print(f'\nrclone version {__version__} \n')
         sys.exit(exit_codes['EX_OK']['Code'])
 
     failure = """ : Check of runtime parameters failed for unknown reason.
