@@ -32,26 +32,30 @@ ${bodytext}
 
   ${title}SYNOPSIS${bodytext}
 
-            $  sh ${title}$pkg${bodytext}   --list || --copy || --verify || --help
+            $  sh ${title}$pkg${bodytext}   --list || --copy || --verify || --download --remote
 
                     -r | --remote   <${yellow}REMOTE${bodytext}>
                    [-c | --copy <${yellow}SOURCE${bodytext}> <${yellow}DESTINATION${bodytext}> ]
+                   [-d | --download ]
                    [-h | --help     ]
                    [-l | --list     ]
                    [-v | --verify   ]
 
   ${title}OPTIONS${bodytext}
 
-      ${title}-r | --remote${bodytext}:  Remote file share (local or network location).
+      ${title}-c | --copy${bodytext}: Copy complete file set from <${yellow}REMOTE${bodytext}>. Must be used
+                    in conjunction with --remote parameter.
 
-      ${title}-c | --copy${bodytext} : Copy complete file set from <${yellow}REMOTE${bodytext}>.
-                  must be used in conjunction with --remote parameter.
+      ${title}-d | --download${bodytext}: Copy complete file set from <${yellow}REMOTE${bodytext}> to /tmp
+                    directory on local machine.
 
       ${title}-h | --help${bodytext}:  Print this help menu
 
       ${title}-l | --list${bodytext}:  List remotes available on this local machine.
 
-      ${title}-v | --verify${bodytext}:  Verify installation of the rclone application
+      ${title}-r | --remote${bodytext}:  Remote file share (local or network location).
+
+      ${title}-v | --verify${bodytext}: Verify installation of the rclone application
                   on local machine.
 
 EOM
@@ -107,9 +111,7 @@ function parse_parameters(){
     fi
     if [ $OPERATION = "DOWNLOAD" ] && [ ! "$REMOTE" ]; then
         std_error_exit "You must provide a remote fileshare location (--remote <fileshare>) from which to copy. Exit"
-
-    elif [ $OPERATION = "LIST" ] && [ "$REMOTE" ]; then
-        std_error_exit "You cannot use --remote with the list operation. Exit"
+        #std_error_exit "You cannot use --remote with the list operation. Exit"
     fi
     #
     # <-- end function parse_parameters -->
@@ -135,21 +137,12 @@ function rsync_2local_target() {
     local source="$1"
     local destination="$2"
     #
-    rsync -arv "$source"/ "$destination"/ --delete
+    rsync_bin=$(command -v rsync)
+    $rsync_bin -arv "$source"/ "$destination"/ --delete
+    #
+    # <-- end function rsync_2local_target -->
 }
 
-
-function date_display(){
-    ## return proper date string to display ##
-    local datetime="$1"
-    local dt=$(( $(date -u +%s) - $(date --date="$datetime" +%s) ))
-    local oneday=$(( 24 * 60 * 60 ))
-    if (( $dt <= $oneday )); then
-        printf '%s_ago\n' "$(echo $(convert_time $dt) | awk -F ',' '{print $2","$3}')"
-    else
-        echo $(date --date=${ARR_CTIME[$i]} +"%Y-%m-%d")
-    fi
-}
 
 function verify_installation(){
     ## verifies installation of required dependency rclone
