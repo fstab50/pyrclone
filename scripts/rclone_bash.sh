@@ -14,8 +14,8 @@ bodytext=$(echo -e ${reset}${a_wgray})
 sp="${frame}|${bodytext}"
 
 # set defaults
-SOURCE_DEFAULT="/home/blake/Downloads/gdrive"
-DESTINATION_DEFAULT="/home/blake/Documents/Trading/STATIC PORTFOLIO DOCUMENTATION"
+LOCAL_SOURCE_DEFAULT="/home/blake/Downloads/gdrive"
+LOCAL_DESTINATION_DEFAULT="/home/blake/Documents/Trading/STATIC PORTFOLIO DOCUMENTATION"
 
 # Set excecutables
 rclone=$(command -v rclone)
@@ -39,12 +39,12 @@ ${bodytext}
 
             $  sh ${title}$pkg${bodytext}   --list || --copy || --verify || --download --remote
 
-                    -r | --remote   <${yellow}REMOTE${bodytext}>
+                   [-r | --remote   <${yellow}REMOTE${bodytext}> ]
                    [-c | --copy <${yellow}SOURCE${bodytext}> <${yellow}DESTINATION${bodytext}> ]
-                   [-d | --download ]
-                   [-h | --help     ]
-                   [-l | --list     ]
-                   [-v | --verify   ]
+                   [-d | --download  ]
+                   [-h | --help      ]
+                   [-l | --list      ]
+                   [-v | --verify    ]
 
   ${title}OPTIONS${bodytext}
 
@@ -85,7 +85,7 @@ function parse_parameters(){
                     if [ "$2" ] && [ "$3" ]; then
                         SOURCE="$2"
                         DESTINATION="$3"
-                        echo "SOURCE: $SOURCE, DESTINATION:  $DESTINATION."; exit 0
+                        std_message "SOURCE: $SOURCE, DESTINATION:  $DESTINATION." "INFO"
                         shift 3
                     else
                         std_error_exit "Both source and destation must be provided after the --copy parameter" "1"
@@ -189,11 +189,13 @@ elif [ $OPERATION = "LIST" ] && [ "$REMOTE" ]; then
 
 elif [ $OPERATION = "LIST" ] && [ ! "$REMOTE" ]; then
 
-    $rclone ls "$REMOTE"
+    $rclone listremotes
 
 elif [ $OPERATION = "COPY" ]; then
 
-    std_message "Beginning Copy operation from $1 to $2"
+    std_message "Beginning Copy operation from $SOURCE --> $DESTINATION." "INFO"
+    $rclone copy "$SOURCE" "$LOCAL_SOURCE_DEFAULT"
+    rsync_2local_target "$LOCAL_SOURCE_DEFAULT" "$LOCAL_DESTINATION_DEFAULT"
 
 fi
 
