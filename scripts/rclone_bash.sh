@@ -68,6 +68,20 @@ EOM
     # <-- end function help -->
 }
 
+
+function _prerequisites(){
+    ## sets up required dependency filesystem artifacts ##
+    if [ ! -f "$LOG_FILE" ]; then
+        std_message "Creating log file $LOG_FILE because it does not exist." "INFO"
+        touch "$LOG_FILE"
+    fi
+    if [ ! -d "$LOCAL_SOURCE_DEFAULT" ]; then
+        std_message "Creating $LOCAL_SOURCE_DEFAULT directory." "INFO"
+        mkdir -p "$LOCAL_SOURCE_DEFAULT"
+    fi
+}
+
+
 function parse_parameters(){
     if [[ ! $@ ]]; then
         help_menu
@@ -171,6 +185,7 @@ function verify_installation(){
 # MAIN  ------------------------------------------------------------------
 #
 
+_prerequisites
 
 parse_parameters $@
 
