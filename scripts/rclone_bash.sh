@@ -32,11 +32,10 @@ ${bodytext}
 
   ${title}SYNOPSIS${bodytext}
 
-            $  sh ${title}$pkg${bodytext}   --download || --copy --remote
+            $  sh ${title}$pkg${bodytext}   --list || --copy || --verify || --help
 
                     -r | --remote   <${yellow}REMOTE${bodytext}>
-                   [-c | --copy ]
-                   [-d | --download ]
+                   [-c | --copy <${yellow}SOURCE${bodytext}> <${yellow}DESTINATION${bodytext}> ]
                    [-h | --help     ]
                    [-l | --list     ]
                    [-v | --verify   ]
@@ -45,7 +44,7 @@ ${bodytext}
 
       ${title}-r | --remote${bodytext}:  Remote file share (local or network location).
 
-      ${title}-d | --download${bodytext}: Download complete file set from <${yellow}REMOTE${bodytext}>.
+      ${title}-c | --copy${bodytext} : Copy complete file set from <${yellow}REMOTE${bodytext}>.
                   must be used in conjunction with --remote parameter.
 
       ${title}-h | --help${bodytext}:  Print this help menu
@@ -77,6 +76,11 @@ function parse_parameters(){
                     shift 1
                     ;;
 
+                -d | --download)
+                    OPERATION="DOWNLOAD"
+                    shift 1
+                    ;;
+
                 -l | --list)
                     OPERATION="LIST"
                     shift 1
@@ -89,7 +93,8 @@ function parse_parameters(){
                     ;;
 
                 -v | --verify)
-                    verify_installation
+                    verify_installation 'rclone'
+                    verify_installation 'rsync'
                     exit 0
                     ;;
 
@@ -100,13 +105,11 @@ function parse_parameters(){
             esac
         done
     fi
-    if [ ! $PROFILE ] && [ ! $ACCTFILE ]; then
-        PROFILE="default"
-    elif [ $PROFILE ] && [ $ACCTFILE ]; then
-        std_error_exit "You cannot provide both an account file and a PROFILE parameter. Exit"
-    fi
-    if [ $PROFILE ]; then
-        ACCOUNTS=( "$PROFILE" )
+    if [ $OPERATION = "DOWNLOAD" ] && [ ! "$REMOTE" ]; then
+        std_error_exit "You must provide a remote fileshare location (--remote <fileshare>) from which to copy. Exit"
+
+    elif [ $OPERATION = "LIST" ] && [ "$REMOTE" ]; then
+        std_error_exit "You cannot use --remote with the list operation. Exit"
     fi
     #
     # <-- end function parse_parameters -->
@@ -115,11 +118,13 @@ function parse_parameters(){
 
 function download_from_remote(){
     ## calculates number of unique regions lambda functions found ##
-    local remote_fs="$1"
-    local write_dir=$(pwd)
-    local rclone=$(which rclone)
+    local from_remote="$1"
+    local to_localdir="/tmp"
+    local rclone=$(command -v rclone)
     #
-    $rclone copy $remote_fs $write_dir
+    std_message "Downloading from $from_remote to $to_localdir." "INFO"
+    $rclone copy "$from_remote" "$to_localdir"
+    std_message "Download completed."  "INFO"
     #
     # <-- end function download_from_remote -->
 }
@@ -130,7 +135,7 @@ function rsync_2local_target() {
     local source="$1"
     local destination="$2"
     #
-    rsync -arv $source/* $destination/ --delete
+    rsync -arv "$source"/ "$destination"/ --delete
 }
 
 
@@ -148,12 +153,12 @@ function date_display(){
 
 function verify_installation(){
     ## verifies installation of required dependency rclone
-    program="rclone"
-    if [[ $(command -v $program) ]]; then
-        std_message "$program installed" "INFO"
+    local program="$1"
+    if [[ $(command -v "$program") ]]; then
+        std_message "$program is installed." "INFO"
         return 0
     else
-        std_message "$program not installed or not in your PATH. Exit" "WARN"
+        std_message "$program not installed or not in your PATH. Exit." "WARN"
         return 1
     fi
 }
@@ -162,13 +167,27 @@ function verify_installation(){
 # MAIN  ------------------------------------------------------------------
 #
 
+
 parse_parameters $@
 
-if verify_installation; then
-    continue
-else
+if ! verify_installation 'rclone' || ! verify_installation 'rsync'; then
     exit 1
 fi
 
+# begin
+if [ $OPERATION = "DOWNLOAD" ] && [ "$REMOTE" ]; then
+
+    download_from_remote "$REMOTE"
+
+elif [ $OPERATION = "LIST" ] && [ "$REMOTE" ]; then
+
+    rclone=$(command -v rclone)
+    $rclone ls $REMOTE
+
+elif [ $OPERATION = "COPY" ]; then
+
+    std_message "Beginning Copy operation from $1 to $2"
+
+fi
 
 exit 0
