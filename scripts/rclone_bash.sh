@@ -13,9 +13,14 @@ reset=$(tput sgr0)
 bodytext=$(echo -e ${reset}${a_wgray})
 sp="${frame}|${bodytext}"
 
-#
+# set defaults
 SOURCE_DEFAULT="/home/blake/Downloads/gdrive"
 DESTINATION_DEFAULT="/home/blake/Documents/Trading/STATIC PORTFOLIO DOCUMENTATION"
+
+# Set excecutables
+rclone=$(command -v rclone)
+rsync_bin=$(command -v rsync)
+LOG_FILE=$HOME/logs/rclone_bash.log
 
 # error codes
 E_BADARG=8                  # exit code if bad input parameter
@@ -77,7 +82,14 @@ function parse_parameters(){
 
                 -c | --copy)
                     OPERATION="COPY"
-                    shift 1
+                    if [ "$2" ] && [ "$3" ]; then
+                        SOURCE="$2"
+                        DESTINATION="$3"
+                        echo "SOURCE: $SOURCE, DESTINATION:  $DESTINATION."; exit 0
+                        shift 3
+                    else
+                        std_error_exit "Both source and destation must be provided after the --copy parameter" "1"
+                    fi
                     ;;
 
                 -d | --download)
@@ -110,8 +122,8 @@ function parse_parameters(){
         done
     fi
     if [ $OPERATION = "DOWNLOAD" ] && [ ! "$REMOTE" ]; then
-        std_error_exit "You must provide a remote fileshare location (--remote <fileshare>) from which to copy. Exit"
-        #std_error_exit "You cannot use --remote with the list operation. Exit"
+        std_error_exit "You must provide a remote fileshare location (--remote <fileshare>) from which to copy. Exit" "1"
+        #std_error_exit "You cannot use --remote with the list operation. Exit" "1"
     fi
     #
     # <-- end function parse_parameters -->
@@ -137,7 +149,6 @@ function rsync_2local_target() {
     local source="$1"
     local destination="$2"
     #
-    rsync_bin=$(command -v rsync)
     $rsync_bin -arv "$source"/ "$destination"/ --delete
     #
     # <-- end function rsync_2local_target -->
@@ -174,8 +185,11 @@ if [ $OPERATION = "DOWNLOAD" ] && [ "$REMOTE" ]; then
 
 elif [ $OPERATION = "LIST" ] && [ "$REMOTE" ]; then
 
-    rclone=$(command -v rclone)
-    $rclone ls $REMOTE
+    $rclone ls "$REMOTE"
+
+elif [ $OPERATION = "LIST" ] && [ ! "$REMOTE" ]; then
+
+    $rclone ls "$REMOTE"
 
 elif [ $OPERATION = "COPY" ]; then
 
