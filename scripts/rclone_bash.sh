@@ -21,6 +21,7 @@ LOCAL_DESTINATION_DEFAULT="/home/blake/Documents/Trading/STATIC PORTFOLIO DOCUME
 rclone=$(command -v rclone)
 rsync_bin=$(command -v rsync)
 LOG_FILE=$HOME/logs/rclone_bash.log
+BROADCAST=false
 
 # error codes
 E_BADARG=8                  # exit code if bad input parameter
@@ -172,11 +173,17 @@ function rsync_2local_target() {
 function verify_installation(){
     ## verifies installation of required dependency rclone
     local program="$1"
+    local broadcast=$BROADCAST
+
     if [[ $(command -v "$program") ]]; then
-        std_message "$program is installed." "INFO"
+        if [[ $broadcast = true ]]; then
+            std_message "$program is installed." "INFO"
+        fi
         return 0
     else
-        std_message "$program not installed or not in your PATH. Exit." "WARN"
+        if [[ $broadcast = true ]]; then
+            std_message "$program not installed or not in your PATH. Exit." "WARN"
+        fi
         return 1
     fi
 }
@@ -189,7 +196,7 @@ _prerequisites
 
 parse_parameters $@
 
-if ! verify_installation 'rclone' || ! verify_installation 'rsync'; then
+if ! verify_installation 'rclone' || ! verify_installation 'rsync' true; then
     exit 1
 fi
 
