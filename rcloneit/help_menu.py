@@ -6,9 +6,9 @@ Help Menu
 
 """
 
-from xlines.statics import PACKAGE
-from xlines import Colors
-from xlines.variables import acct, bbc, bbl, bcy, bdcy, bdwt, bwt, rst
+from rcloneit.statics import PACKAGE
+from rcloneit import Colors
+from rcloneit.variables import acct, bbc, bbl, bcy, bdcy, bdwt, bwt, rst
 
 
 c = Colors()
@@ -27,8 +27,8 @@ synopsis_cmd = (
         lbrct + '--no-whitespace' + vdiv + '--multiprocess' + rbrct
     )
 
-url_doc = c.URL + 'http://xlines.readthedocs.io' + rst
-url_sc = c.URL + 'https://github.com/fstab50/xlines' + rst
+url_doc = c.URL + 'http://rcloneit.readthedocs.io' + rst
+url_sc = c.URL + 'https://github.com/fstab50/rcloneit' + rst
 
 
 footer = """

@@ -8,7 +8,7 @@ import argparse
 from shutil import rmtree, which
 from libtools import exit_codes, logd, stdout_message
 from libtools import Colors, ColorMap
-
+from rcloneit import logger
 
 # globals
 cm = ColorMap()
@@ -18,8 +18,6 @@ PKG_ACCENT = Colors.ORANGE
 PARAM_ACCENT = Colors.WHITE
 bdwt = cm.bd + cm.bwt
 
-# instatiate logger
-logger = logd.getLogger('1.0')
 
 write_dir = '/home/Downloads/gdrive'
 __version__ = '0.3'

@@ -11,7 +11,7 @@ __email__ = "blakeca00@gmail.com"
 
 try:
 
-    from pyrclone import logd
+    from rcloneit import logd
 
     # init logger object
     logger = logd.getLogger(__version__)

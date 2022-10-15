@@ -203,7 +203,15 @@ fi
 # begin
 if [ $OPERATION = "DOWNLOAD" ] && [ "$REMOTE" ]; then
 
+    std_message "Looking for remotes..." "INFO"
+    if [[ ! $($rclone listremotes | grep generic) ]]; then
+        REMOTE='gdrive:'
+    else
+        REMOTE=$($rclone listremotes | grep generic)
+    fi
+    std_message "Beginning download.  Please wait..." "INFO"
     download_from_remote "$REMOTE"
+    std_message "Download complete." "INFO"
 
 elif [ $OPERATION = "LIST" ] && [ "$REMOTE" ]; then
 

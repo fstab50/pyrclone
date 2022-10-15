@@ -1,6 +1,6 @@
 """
 Summary:
-    xlines Project-level Defaults and Settings
+    rcloneit Project-level Defaults and Settings
 
 Module Attributes:
     - user_home (TYPE str):
@@ -10,14 +10,14 @@ Module Attributes:
     - config_path (TYPE str):
         default for stsaval config files, includes config_dir (~/.stsaval)
     - key_deprecation (TYPE str):
-        Deprecation logic that xlines uses when 2 keys exist for a user.
+        Deprecation logic that rcloneit uses when 2 keys exist for a user.
 """
 
 import os
 import inspect
 import logging
-from xlines.common import read_local_config, get_os, os_parityPath
-from xlines._version import __version__
+from rcloneit.common import read_local_config, get_os, os_parityPath
+from rcloneit._version import __version__
 
 logger = logging.getLogger(__version__)
 logger.setLevel(logging.INFO)
@@ -42,7 +42,7 @@ else:
     # section with appropriate pathnames
 
     # project
-    PACKAGE = 'xlines'
+    PACKAGE = 'rcloneit'
     LICENSE = 'GPL v3'
     LICENSE_DESC = 'General Public License v3'
     version = __version__
@@ -50,7 +50,7 @@ else:
     # config parameters
     config_dir = '.config'
     config_subdir = PACKAGE
-    config_filename = 'xlinesconf.json'
+    config_filename = 'rcloneitconf.json'
     config_dirpath = os.path.join(user_home, config_dir, config_subdir)
     config_path = os.path.join(config_dirpath, config_filename)
 
@@ -68,7 +68,7 @@ else:
     # logging parameters
     enable_logging = False
     log_mode = 'FILE'
-    log_filename = 'xlines.log'
+    log_filename = 'rcloneit.log'
     log_dir = os.path.join(user_home, 'logs')
     log_path = os.path.join(log_dir, log_filename)
 
