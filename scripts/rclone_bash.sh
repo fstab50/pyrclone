@@ -3,7 +3,7 @@
 # globals
 pkg=$(basename $0)
 pkg_path=$(cd $(dirname $0); pwd -P)
-clear=$(which clear)
+clear=$(command -v clear)
 
 # formatting
 source $pkg_path/std_functions.sh
@@ -53,7 +53,7 @@ ${bodytext}
                     in conjunction with --remote parameter.
 
       ${title}-d | --download${bodytext}: Copy complete file set from <${yellow}REMOTE${bodytext}> to /tmp
-                    directory on local machine.
+                    directory on local machine. Must be used with --remote parameter.
 
       ${title}-h | --help${bodytext}:  Print this help menu
 
